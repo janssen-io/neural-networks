@@ -9,7 +9,7 @@ class MultilayerNetwork:
         self.network = []
 
         # create layers
-        self.init_layers()
+        self.init_layers(activation_functions, activation_derivatives, net_weights)
 
     def init_layers(self, activation_functions, activation_derivatives):
         # for all lists of activation functions
