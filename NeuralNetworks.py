@@ -4,14 +4,14 @@ class MultilayerNetwork:
     def __init__(self, features, activation_functions, activation_derivatives, net_weights=None, alpha=0.1):
         '''Creates a neural network using a list of strings as input '''
         self.alpha = alpha
-        
+
         # initialise an empty network
         self.network = []
 
         # create layers
-        self.init_layers(activation_functions, activation_derivatives, net_weights)
+        self.init_layers(features, activation_functions, activation_derivatives, net_weights)
 
-    def init_layers(self, activation_functions, activation_derivatives, net_weights):
+    def init_layers(self, features, activation_functions, activation_derivatives, net_weights):
         # for all lists of activation functions
         for i, functions in enumerate(activation_functions):
 
@@ -21,7 +21,7 @@ class MultilayerNetwork:
             # for all activation functions in one layer
             for j, function in enumerate(functions):
 
-                #get the derivative
+                # get the derivative
                 derivative = activation_derivatives[i][j]
 
                 # use given weights if available
@@ -36,10 +36,10 @@ class MultilayerNetwork:
 
                 # Create a Node and append it to the current layer
                 layer.append(Node(
-                    name = j,
-                    weights = weights,
-                    fn = function,
-                    deriv = derivative,
+                    name=j,
+                    weights=weights,
+                    fn=function,
+                    deriv=derivative,
                 ))
             # append the layer to the network
             self.network.append(layer)
@@ -50,7 +50,6 @@ class MultilayerNetwork:
                 # adjust references foreach node in the previous layer
                 for node in self.network[i-1]:
                     node.next = [l for l in layer]
-
 
     def train(self,
          targets: "List of target outputs equal to the size of output nodes",
@@ -68,11 +67,11 @@ class MultilayerNetwork:
             for i, node in enumerate(layer):
                 node.update_weights(self.alpha, errors)
 
-    def test(self, 
-        testset: "A tuple containing a list of target ouputs and input values"):
+    def test(self,
+            testset: "A tuple containing a list of target ouputs and input values"):
         '''Test the network against a testset'''
         n = len(testset)
-        false_positives, false_negatives = 0, 0 #false positives, false negatives
+        false_positives, false_negatives = 0, 0  
         false_negative_results = []
         for target, values in testset:
             if not self.test_sample(target, values):
@@ -83,7 +82,7 @@ class MultilayerNetwork:
                     false_positives += 1
         errors = false_negatives + false_positives
         accuracy = (n - errors) / n
-        return {'size': n, 'false positive': false_positives, 'false negatives': false_negatives, 'errors': errors, 'accuracy': accuracy, 'values': false_negative_results }
+        return {'size': n, 'false positive': false_positives, 'false negatives': false_negatives, 'errors': errors, 'accuracy': accuracy, 'values': false_negative_results}
 
     def test_sample(self, target, inputs):
         '''Test a single input/output pair'''
@@ -93,7 +92,7 @@ class MultilayerNetwork:
         '''Classify the given inputs'''
         for layer in range(len(self.network)):
             inputs = self.layer_classify(inputs, layer)
-        return [v for k,v in inputs.items()]
+        return [v for k, v in inputs.items()]
 
     def layer_classify(self, inputs, layer):
         '''Put the given inputs through the specified layer'''
@@ -118,6 +117,7 @@ class MultilayerNetwork:
             string += '{}\n'.format(str(node))
         return string
 
+
 class Node:
     def __init__(self, name, weights, fn, deriv, next_layer=[]):
         self.weights = weights
@@ -131,14 +131,14 @@ class Node:
 
     def __str__(self):
         children = [node for node in self.next]
-        string = '{}: {}'.format(self.name,str(self.weights))
+        string = '{}: {}'.format(self.name, str(self.weights))
         for child in children:
             string += '\n\t{}:{}\n'.format(self.name, str(child))
         return string
 
-    def update_weights(self, 
-        alpha: "learning rate",
-        error: "Backwards propogated error term"):
+    def update_weights(self,
+         alpha: "learning rate",
+         error: "Backwards propogated error term"):
         for k, v in self.weights.items():
             self.weights[k] += alpha * self.inputs[k] * self.delta(error)
 
