@@ -13,30 +13,30 @@ class MultilayerNetwork:
 
     def init_layers(self, features, activation_functions, activation_derivatives, net_weights):
         # for all lists of activation functions
-        for i, functions in enumerate(activation_functions):
+        for layer_index, functions in enumerate(activation_functions):
 
             # create a new layer
             layer = []
 
             # for all activation functions in one layer
-            for j, function in enumerate(functions):
+            for node_index, function in enumerate(functions):
 
                 # get the derivative
-                derivative = activation_derivatives[i][j]
+                derivative = activation_derivatives[layer_index][node_index]
 
                 # use given weights if available
                 if net_weights:
-                    weights = net_weights[i][j]
+                    weights = net_weights[layer_index][node_index]
 
                 # else define them for the right layer
                 elif i == 0:
                     weights = {f: random.randrange(-5, 5, 1)/10 for f in features}
                 else:
-                    weights = {n.name: random.randrange(-5, 5, 1)/10 for n in self.network[i-1]}
+                    weights = {n.name: random.randrange(-5, 5, 1)/10 for n in self.network[layer_index-1]}
 
                 # Create a Node and append it to the current layer
                 layer.append(Node(
-                    name=j,
+                    name=node_index,
                     weights=weights,
                     fn=function,
                     deriv=derivative,
@@ -45,11 +45,11 @@ class MultilayerNetwork:
             self.network.append(layer)
 
             # if its not the input layer
-            if i > 0:
+            if layer_index > 0:
 
                 # adjust references foreach node in the previous layer
-                for node in self.network[i-1]:
-                    node.next = [l for l in layer]
+                for node in self.network[layer_index-1]:
+                    node.next = [layer_node for layer_node in layer]
 
     def train(self,
          targets: "List of target outputs equal to the size of output nodes",
