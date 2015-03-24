@@ -11,7 +11,7 @@ class MultilayerNetwork:
         # create layers
         self.init_layers(activation_functions, activation_derivatives, net_weights)
 
-    def init_layers(self, activation_functions, activation_derivatives):
+    def init_layers(self, activation_functions, activation_derivatives, net_weights):
         # for all lists of activation functions
         for i, functions in enumerate(activation_functions):
 
@@ -32,7 +32,7 @@ class MultilayerNetwork:
                 elif i == 0:
                     weights = {f: random.randrange(-5, 5, 1)/10 for f in features}
                 else:
-                    weights = {n.name: random.randrange(-5, 5, 1)/10 for n in layers[i-1]}
+                    weights = {n.name: random.randrange(-5, 5, 1)/10 for n in self.network[i-1]}
 
                 # Create a Node and append it to the current layer
                 layer.append(Node(
@@ -48,7 +48,7 @@ class MultilayerNetwork:
             if i > 0:
 
                 # adjust references foreach node in the previous layer
-                for node in layers[i-1]:
+                for node in self.network[i-1]:
                     node.next = [l for l in layer]
 
 
@@ -83,7 +83,7 @@ class MultilayerNetwork:
                     false_positives += 1
         errors = false_negatives + false_positives
         accuracy = (n - errors) / n
-        return {'size': n, 'false positive': false_positives, 'false negatives': false_negatives, 'errors': errors, 'accuracy': accuracy, 'values': fns }
+        return {'size': n, 'false positive': false_positives, 'false negatives': false_negatives, 'errors': errors, 'accuracy': accuracy, 'values': false_negative_results }
 
     def test_sample(self, target, inputs):
         '''Test a single input/output pair'''
