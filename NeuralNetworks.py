@@ -64,7 +64,7 @@ class MultilayerNetwork:
 
         # propogate the error backwards through the net
         for layer in self.network:
-            for i, node in enumerate(layer):
+            for node in layer:
                 node.update_weights(self.alpha, errors)
 
     def test(self,
@@ -91,31 +91,27 @@ class MultilayerNetwork:
     def classify(self, inputs):
         '''Classify the given inputs'''
         for layer in range(len(self.network)):
+            # feed the inputs forward
             inputs = self.layer_classify(inputs, layer)
-        return [v for k, v in inputs.items()]
+        return [v for _, v in inputs.items()]
 
     def layer_classify(self, inputs, layer):
         '''Put the given inputs through the specified layer'''
-        new_inputs = {}
-        for node in self.network[layer]:
-            new_inputs[node.name] = node.output(inputs)
-        return new_inputs
+        return {
+            node.name: node.output(inputs)
+            for node in self.network[layer]
+        }
 
     def weights(self):
         '''Get the weights of all nodes per layer'''
         weights = []
         for layer in self.network:
-            layer_weights = []
-            for node in layer:
-                layer_weights.append(node.weights)
+            layer_weights = [node.weights for node in layer]
             weights.append(layer_weights)
         return weights
 
     def __str__(self):
-        string = ""
-        for node in self.network[0]:
-            string += '{}\n'.format(str(node))
-        return string
+        return '\n'.join(str(node) for node in self.network[0]) + '\n'
 
 
 class Node:
@@ -162,10 +158,7 @@ class Node:
     def weighted_sum(self):
         '''Get the weighted sum of the inputs'''
         if not self.wsum:
-            wsum = 0
-            for k, v in self.inputs.items():
-                wsum += self.weights[k] * v
-            self.wsum = wsum
+            self.wsum = sum(self.weights[k] * v for k,v in self.inputs.items())
         return self.wsum
 
     def output(self, inputs):
